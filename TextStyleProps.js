@@ -36,7 +36,7 @@ const textAlignmentsVertical = ["auto", "top", "bottom", "center"];
 const writingDirections = ["auto", "ltr", "rtl"];
 
 //Colors
-const colors = ["#767577", "red", "#f9a33a", "#0c0b0b", "#f8d99c", "#DAA520"];
+const colors = ["#767577","#fff", "red", "#f9a33a", "#0c0b0b", "#f8d99c", "#DAA520"];
 
 const TextStyleProps = () => {
   //Backgrounds
@@ -62,7 +62,7 @@ const TextStyleProps = () => {
     height: 0,
     width: 0,
   });
-  const [hideLabel, setHideLabel] = useState(false);
+  const [showLabel, setShowLabel] = useState(true);
 
   const [, ...validFontVariants] = fontVariants;
 
@@ -73,10 +73,10 @@ const TextStyleProps = () => {
     <SafeAreaView style={styles.container}>
       <View style={[styles.banner, absOffset]}>
         <View style={[styles.blackBox, { backgroundColor: colors[bg1] }]}>
-          <Text>BG-1</Text>
+          {showLabel && <Text>BG-1</Text>}
         </View>
         <View style={[styles.orangeBox, { backgroundColor: colors[bg2] }]}>
-          <Text>BG-2</Text>
+          {showLabel && <Text>BG-2</Text>}
         </View>
       </View>
 
@@ -112,19 +112,19 @@ const TextStyleProps = () => {
       <ScrollView style={{ paddingHorizontal: 12, marginTop: 300 }}>
         <View>
           <CustomSwitch
-            label="Hide Labels"
-            handleValueChange={() => setHideLabel((q) => !q)}
-            value={hideLabel}
+            label="Labels"
+            handleValueChange={() => setShowLabel((q) => !q)}
+            value={showLabel}
           />
           <ColorPicker label="BG-1" data={colors} currentIndex={bg1} onSelected={setBg1} />
           <ColorPicker label="BG-2" data={colors} currentIndex={bg2} onSelected={setBg2} />
-          <Text>Common platform properties</Text>
           <ColorPicker
             label="Text Color"
             data={colors}
             currentIndex={textColor}
             onSelected={setTextColor}
           />
+          <Text>Common platform properties</Text>
           <CustomSlider
             label="Text Shadow Offset - Height"
             value={textShadowOffset.height}

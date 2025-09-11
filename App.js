@@ -2,10 +2,12 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import TextStyleProps from "./TextStyleProps";
+import Palette from "./pallette";
 export default function App() {
   return (
     <SafeAreaProvider style={styles.container}>
-      <TextStyleProps />
+      {/* <TextStyleProps /> */}
+      <Palette />
       <StatusBar style="auto" />
     </SafeAreaProvider>
   );
