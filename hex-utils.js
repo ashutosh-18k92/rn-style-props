@@ -8,22 +8,23 @@ const hexDecMap = {
 };
 
 const codes = "0123456789abcdef".split("");
-const [BLACK, RED, GREEN, BLUE, WHITE] = ["000000", "FF0000", "00FF00", "0000FF", "FFFFFF"];
 
-export const expandRange = (col) => {
+export const expandRange = (bgColor) => {
   const splitRGB = (color) => {
     let bits = toHexBits(color);
     return [bits.splice(0, 2), bits.splice(0, 2), bits.splice(0, 2)];
   };
   const RGB = "RGB".split("");
   const grid = [];
-  const rgb = splitRGB(col);
+  const rgb = splitRGB(bgColor);
   const rgbSum = rgb.map(sumOfHex);
+  console.log({ rgbSum });
   //reverse
-  const rgbSorted = [...rgbSum].sort((a, b) => (a < b ? 1 : -1)); //reduce((max, i) => (i > max ? i : max), -1);
+  const rgbSorted = [...rgbSum].sort((a, b) => (a <= b ? 1 : -1)); //reduce((max, i) => (i > max ? i : max), -1);
+  console.log("sort rgb", bgColor, rgbSorted);
   const primaryIndex = rgbSum.indexOf(rgbSorted[0]);
-  const primaryColor = [rgb[primaryIndex].join("")];
   const firstMixIndex = rgbSum.indexOf(rgbSorted[1]);
+  const primaryColor = [rgb[primaryIndex].join("")];
   const firstMix = [rgb[firstMixIndex].join("")];
   const secondMix = codes;
 
@@ -67,49 +68,7 @@ export const defaultColors = () => {
   return grid;
 };
 
-/*const oddShade = (color) => {
-  const bits = toHexBits(color);
-  const cp1 = codes.slice(codes.indexOf(bits[1]));
-  const cp2 = codes.slice(codes.indexOf(bits[3]));
-  const cp3 = codes.slice(codes.indexOf(bits[5]));
-  const grid = [];
-  cp1.forEach((c1) => {
-    if (c1 == bits[0]) return;
-    cp2.forEach((c2) => {
-      if (c2 == bits[2]) return;
-      let row = [];
-      cp3.forEach((c3) => {
-        if (c3 == bits[4]) return;
-        row.push("#" + [bits[0], c1, bits[2], c2, bits[4], c3].join(""));
-      });
-      grid.push(row);
-    });
-  });
-  return grid;
-};
-
-const evenShade = (color) => {
-  const bits = toHexBits(color);
-  const cp1 = codes.slice(codes.indexOf(bits[0]));
-  const cp2 = codes.slice(codes.indexOf(bits[2]));
-  const cp3 = codes.slice(codes.indexOf(bits[4]));
-  const grid = [];
-  cp1.forEach((c1) => {
-    if (c1 == bits[1]) return;
-    cp2.forEach((c2) => {
-      if (c2 == bits[3]) return;
-      let row = [];
-      cp3.forEach((c3) => {
-        if (c3 == bits[5]) return;
-        row.push("#" + [c1, bits[1], c2, bits[3], c3, bits[5]].join(""));
-      });
-      grid.push(row);
-    });
-  });
-  return grid;
-};*/
-
-export const shades = (color) => {
+export const getShadesOf = (color) => {
   if (!color) return defaultColors();
   return expandRange(color);
 };
@@ -162,12 +121,24 @@ const invertHighs = (bits) => {
  * @param {*} bgColor
  * @returns
  */
-export const mapTextColorAgainstBg = (bgColor) => {
-  if(!bgColor) return "#cccccc"
+export const bestTextColorOnBackground = (bgColor) => {
+  if (!bgColor) return "#cccccc";
   const bits = toHexBits(bgColor);
   let hsum = sumOfHex(bits);
   let complement = hexComplement(bits);
   let invertedHigh = invertHighs(bits);
   return toHexColor(invertedHigh);
-  return hsum <= 51 ? "white" : toHexColor(invertedHigh);
+  return hsum <= 51 ? "#ffffff" : toHexColor(invertedHigh);
+};
+
+export const expandTextColorRange = (textColor) => {
+  const transfrom2Dto1D = (arr2D) => {
+    let arr1D = [];
+    arr2D.forEach((element) => {
+      arr1D = arr1D.concat(element);
+    });
+    return arr1D;
+  };
+  const colors = transfrom2Dto1D(expandRange(textColor));
+  return colors;
 };
