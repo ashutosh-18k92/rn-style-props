@@ -167,7 +167,7 @@ function ColorPalette({ onSelected }) {
                   setPaletteProfileOnExplore(selectedColor);
                 }}
               >
-                <Text style={styles.textStyle}>Explore More Shades</Text>
+                <Text style={styles.textStyle}>Explore Shades</Text>
               </Pressable>
               <Pressable
                 style={[styles.button, styles.buttonCart]}
@@ -226,7 +226,7 @@ function ColorPalette({ onSelected }) {
                 <Pressable
                   onPress={() => setPaletteProfileJump(i)}
                   style={[
-                    { flex: 1, marginRight: 8, alignItems: "center", alignContent: "center" },
+                    { marginRight: 8, alignItems: "center", alignContent: "center" },
 
                     selected && {
                       borderWidth: 2,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
   paletteRowContainer: { margin: 10, borderRadius: 50 },
   scrollViewContainer: { paddingVertical: 15 },
-  cartContainer: { flex: 1 },
+  cartContainer: { flex: 1, marginHorizontal: 10, padding: 25 },
   navContainer: {
     flexDirection: "row",
     height: 40,
@@ -354,8 +354,9 @@ const styles = StyleSheet.create({
 
   modalButtonContainer: {
     width: "100%",
-    position: "absolute",
-    bottom: 10,
+    // position: "absolute",
+    // bottom: 10,
+    padding: 30,
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",

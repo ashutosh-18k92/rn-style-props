@@ -18,10 +18,9 @@ export const expandRange = (bgColor) => {
   const grid = [];
   const rgb = splitRGB(bgColor);
   const rgbSum = rgb.map(sumOfHex);
-  console.log({ rgbSum });
+
   //reverse
-  const rgbSorted = [...rgbSum].sort((a, b) => (a <= b ? 1 : -1)); //reduce((max, i) => (i > max ? i : max), -1);
-  console.log("sort rgb", bgColor, rgbSorted);
+  const rgbSorted = [...rgbSum].sort((a, b) => (a <= b ? 1 : -1));
   const primaryIndex = rgbSum.indexOf(rgbSorted[0]);
   const firstMixIndex = rgbSum.indexOf(rgbSorted[1]);
   const primaryColor = [rgb[primaryIndex].join("")];
