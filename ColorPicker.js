@@ -7,7 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 function ColorPicker({ label, data, currentIndex, onSelected }) {
   return (
     <>
-      <Text style={styles.title}>{label}</Text>
+      {label && <Text style={styles.title}>{label}</Text>}
 
       <LinearGradient
         colors={["rgba(203, 205, 208, 0.45)", "rgba(203, 205, 208, 0.60)"]}
@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   colorSelected: {
-    height: 19,
-    width: 19,
+    height: 18,
+    width: 18,
     borderRadius: 10,
   },
 
