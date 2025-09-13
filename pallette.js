@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, TextInput } from "react-native";
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import ColorPicker from "./ColorPicker";
-import { bestTextColorOnBackground, getShadesOf, expandTextColorRange } from "./hex-utils";
+import CustomButton from "./CustomButton";
+import IconButton from "./IconButton";
+import {
+  getOptimalTextColor,
+  getShadesOfBgColor,
+  getShadesOfTextColor,
+  Saturation,
+} from "./hex-utils";
 
 function ColorPalette({ onSelected }) {
   const [palette, setPalette] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedTextColor, setSelectedTextColor] = useState(null);
   //index in a row of the palette for the color picker
-  const [selectedColorIndex, setSelectedColorIndex] = useState({ row: -1, column: -1 });
+  const [selectedColorGridIndex, setSelectedColorGridIndex] = useState({ row: -1, column: -1 });
   const [selectedTextColorIndex, setSelectedTextColorIndex] = useState(null);
   const [textColorShades, setTextColorShades] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -17,9 +32,10 @@ function ColorPalette({ onSelected }) {
   const [colorsCart, setColorsCart] = useState([]);
   const [cartForm, setCartForm] = useState({ name: "", backgroundColor: "", color: "" });
   const [formModalVisible, setFormModalVisible] = useState(false);
+  const [saturation, setSaturation] = useState(Saturation.LOW);
 
-  const setPaletteProfileOnExplore = (color) => {
-    const colors = getShadesOf(color);
+  const setPaletteProfileOnExplore = (color, sat) => {
+    const colors = getShadesOfBgColor(color);
     setPalette(colors);
     setSelectedColorsHistory((p) => {
       p.push(color);
@@ -30,37 +46,42 @@ function ColorPalette({ onSelected }) {
 
   const setPaletteProfileJump = (index) => {
     let color = selectedColorsHistory[index];
-    const palette = getShadesOf(color);
+    const palette = getShadesOfBgColor(color);
     setPalette(palette);
     setCurrentHistoryIndex(index);
   };
 
   const setPaletteProfileNext = () => {
     let color = selectedColorsHistory[currentHistoryIndex + 1];
-    const palette = getShadesOf(color);
+    const palette = getShadesOfBgColor(color);
     setPalette(palette);
     setCurrentHistoryIndex((p) => p + 1);
   };
 
   const setPaletteProfilePrevious = () => {
     let color = selectedColorsHistory[currentHistoryIndex - 1];
-    const palette = getShadesOf(color);
+    const palette = getShadesOfBgColor(color);
     setPalette(palette);
     setCurrentHistoryIndex((p) => p - 1);
   };
 
   //init
   useEffect(() => {
-    const colors = getShadesOf();
+    const colors = getShadesOfBgColor();
     setPalette(colors);
   }, []);
+
+  useEffect(() => {
+    const colors = getShadesOfBgColor(selectedColor, saturation);
+    setPalette(colors);
+  }, [saturation]);
 
   function renderGrid() {
     const colorSelectHandler = (row, column) => {
       const color = palette[row][column];
-      const textColor = bestTextColorOnBackground(color);
-      const textColorShades = expandTextColorRange(textColor);
-      setSelectedColorIndex({ row, column });
+      const textColor = getOptimalTextColor(color);
+      const textColorShades = getShadesOfTextColor(textColor);
+      setSelectedColorGridIndex({ row, column });
       setSelectedColor(color);
       setSelectedTextColor(textColor);
       setTextColorShades(textColorShades);
@@ -72,7 +93,9 @@ function ColorPalette({ onSelected }) {
       <View key={i} style={[styles.paletteRowContainer, styles.shadow]}>
         <ColorPicker
           data={colors}
-          currentIndex={i === selectedColorIndex.row ? selectedColorIndex.column : undefined}
+          currentIndex={
+            i === selectedColorGridIndex.row ? selectedColorGridIndex.column : undefined
+          }
           onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
         />
       </View>
@@ -80,6 +103,16 @@ function ColorPalette({ onSelected }) {
   }
 
   function renderFormModal() {
+    const addToCartHandler = () => {
+      setColorsCart((p) => {
+        let q = [...p];
+        q.push(cartForm);
+        return q;
+      });
+      setCartForm({ name: "", backgroundColor: "", color: "" });
+      setFormModalVisible(false);
+    };
+
     return (
       <Modal
         animationType="fade"
@@ -98,20 +131,7 @@ function ColorPalette({ onSelected }) {
                 value={cartForm.name}
                 onChangeText={(name) => setCartForm((q) => ({ ...q, name }))}
               />
-              <Pressable
-                style={[styles.button, styles.buttonCart]}
-                onPress={() => {
-                  setColorsCart((p) => {
-                    let q = [...p];
-                    q.push(cartForm);
-                    return q;
-                  });
-                  setCartForm({ name: "", backgroundColor: "", color: "" });
-                  setFormModalVisible(false);
-                }}
-              >
-                <Text style={styles.textStyle}>Continue</Text>
-              </Pressable>
+              <CustomButton title="Add" style={styles.buttonCart} onPress={addToCartHandler} />
             </View>
           </View>
         </View>
@@ -119,36 +139,28 @@ function ColorPalette({ onSelected }) {
     );
   }
 
-  function renderModal() {
-    return (
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={[styles.modalView, { backgroundColor: selectedColor }]}>
-            <Text
-              style={[
-                styles.modalBgText,
-                { backgroundColor: selectedTextColor, color: selectedColor },
-              ]}
-            >
-              Background: {selectedColor}
-            </Text>
-            <Text style={[styles.modalText, { color: selectedTextColor }]}>
-              Text Color: {selectedTextColor}
-            </Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.textStyle}>Close</Text>
-            </Pressable>
+  function renderPreview() {
+    const showContent = selectedColor && selectedTextColor;
+    const bgStyle = { backgroundColor: selectedColor };
+    const textStyle = { color: selectedTextColor };
 
+    return (
+      <View
+        style={[
+          styles.previewContent,
+          bgStyle,
+          styles.shadow,
+          !showContent && styles.modalViewEmpty,
+        ]}
+      >
+        <Text
+          style={[styles.previewText, { backgroundColor: selectedTextColor, color: selectedColor }]}
+        >
+          {!showContent ? "Preview" : "Background " + selectedColor}
+        </Text>
+        {showContent && (
+          <>
+            <Text style={[styles.previewText, textStyle]}>Text {selectedTextColor}</Text>
             <ColorPicker
               data={textColorShades}
               currentIndex={selectedTextColorIndex}
@@ -158,41 +170,21 @@ function ColorPalette({ onSelected }) {
                 setCartForm((f) => ({ ...f, color: textColorShades[index] }));
               }}
             />
-
-            <View style={styles.modalButtonContainer}>
-              <Pressable
-                style={[styles.button, styles.buttonExplore]}
-                onPress={() => {
-                  setModalVisible(!modalVisible);
-                  setPaletteProfileOnExplore(selectedColor);
-                }}
-              >
-                <Text style={styles.textStyle}>Explore Shades</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.buttonCart]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setFormModalVisible(true);
-                }}
-              >
-                <Text style={styles.textStyle}>Add to Cart</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+          </>
+        )}
+      </View>
     );
   }
 
   function renderCart() {
     if (!!!colorsCart.length) return <Text>Your Cart is empty!</Text>;
     return colorsCart.map((c, i) => (
-      <View style={[styles.cartItem, { backgroundColor: c.backgroundColor }, styles.shadow]}>
-        <Text style={[styles.cartItemName, { color: c.color, textAlign: "left", fontSize: 24 }]}>
-          {c.name}
-        </Text>
-        <Text key={i} style={[{ color: c.color, fontSize: 18, fontWeight: 300 }]}>
+      <View
+        key={i}
+        style={[styles.cartItem, { backgroundColor: c.backgroundColor }, styles.shadow]}
+      >
+        <Text style={[styles.cartItemTitleText, { color: c.color }]}>{c.name}</Text>
+        <Text style={[styles.cartItemBodyText, { color: c.color }]}>
           Background: {c.backgroundColor}{" "}
           <Text style={{ marginHorizontal: 15, fontWeight: 700 }}>/</Text> Text: {c.color}
         </Text>
@@ -200,74 +192,97 @@ function ColorPalette({ onSelected }) {
     ));
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+  function renderNavigationButtons() {
+    const nextDisabled = currentHistoryIndex === selectedColorsHistory.length - 1;
+    const prevDisabled = currentHistoryIndex === -1;
+    return (
+      <>
+        <IconButton
+          name="arrow-back"
+          color="#423e3e"
+          style={[styles.navButton, { left: 10 }]}
+          disabled={prevDisabled}
+          onPress={setPaletteProfilePrevious}
+        />
+        <IconButton
+          name="arrow-forward"
+          color="#423e3e"
+          style={[styles.navButton, { right: 10 }]}
+          disabled={nextDisabled}
+          onPress={setPaletteProfileNext}
+        />
         <View style={styles.navContainer}>
-          <Pressable
-            style={[styles.button, styles.navButton]}
-            disabled={currentHistoryIndex === -1}
-            onPress={setPaletteProfilePrevious}
-          >
-            <Text style={styles.navButtonText}>{"<< Prev"}</Text>
-          </Pressable>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 5,
-              paddingVertical: 10,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <View style={styles.navPagingContainer}>
             {selectedColorsHistory.map((color, i) => {
               const selected = currentHistoryIndex === i;
               return (
-                <Pressable
+                <TouchableWithoutFeedback
                   onPress={() => setPaletteProfileJump(i)}
-                  style={[
-                    { marginRight: 8, alignItems: "center", alignContent: "center" },
-
-                    selected && {
-                      borderWidth: 2,
-                      borderColor: "#6e6868ff",
-                      backgroundColor: "transparent",
-                      borderRadius: 4,
-                    },
-                  ]}
+                  style={[styles.navPage, selected && styles.navPageSelected]}
                 >
                   <View
-                    style={[
-                      {
-                        height: 20,
-                        width: 20,
-                        margin: 3,
-                        borderRadius: 4,
-                        backgroundColor: color,
-                      },
-                      styles.shadow,
-                    ]}
+                    style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}
                   ></View>
-                </Pressable>
+                </TouchableWithoutFeedback>
               );
             })}
           </View>
+        </View>
+      </>
+    );
+  }
 
-          <Pressable
-            style={[styles.button, styles.navButton]}
-            disabled={currentHistoryIndex === selectedColorsHistory.length - 1}
-            onPress={setPaletteProfileNext}
-          >
-            <Text style={styles.navButtonText}>{"Next >>"}</Text>
-          </Pressable>
+  function renderPalette() {
+    return (
+      <>
+        {renderNavigationButtons()}
+        <Text>Saturation: {saturation}</Text>
+        <View style={styles.depthContainer}>
+          <CustomButton
+            title="Reset"
+            style={styles.capsule}
+            onPress={() => {
+              setSelectedColor(null);
+              setSelectedTextColor(null);
+              setSelectedColorGridIndex({});
+              setTextColorShades([]);
+            }}
+          />
+          <CustomButton
+            title="Low"
+            style={styles.capsule}
+            onPress={() => setSaturation(Saturation.LOW)}
+          />
+          <CustomButton
+            title="Medium"
+            style={styles.capsule}
+            onPress={() => setSaturation(Saturation.MEDIUM)}
+          />
+          <CustomButton
+            title="High"
+            style={styles.capsule}
+            onPress={() => setSaturation(Saturation.HIGH)}
+          />
         </View>
-        {renderModal()}
-        {renderFormModal()}
-        <View style={styles.paletteContainer}>
+
+        <ScrollView style={styles.paletteScroll}>
           {palette && palette.length > 0 ? renderGrid() : <Text>Palette is empty</Text>}
+        </ScrollView>
+      </>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        {renderFormModal()}
+        <View style={{ flex: 3, flexDirection: "row" }}>
+          <View style={[styles.previewContainer, styles.shadow]}>{renderPreview()}</View>
+          <View style={styles.paletteContainer}>{renderPalette()}</View>
         </View>
+
         <View style={styles.cartContainer}>
-          <ScrollView style={styles.scrollViewContainer}>{renderCart()}</ScrollView>
+          <ScrollView style={styles.cartScroll}>{renderCart()}</ScrollView>
         </View>
       </View>
     </View>
@@ -277,22 +292,87 @@ function ColorPalette({ onSelected }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "#918f8f30",
   },
-  content: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+
+  depthContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginBottom: 15,
+  },
+
+  capsule: {
+    borderRadius: 30,
+  },
+
+  content: {
+    flex: 1,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    justifyContent: "center",
+  },
   paletteRowContainer: { margin: 10, borderRadius: 50 },
-  scrollViewContainer: { paddingVertical: 15 },
-  cartContainer: { flex: 1, marginHorizontal: 10, padding: 25 },
+  paletteScroll: { paddingHorizontal: 10, margin: 15 },
+
+  cartScroll: { flex: 1, paddingVertical: 15 },
+
+  cartContainer: {
+    flex: 1,
+    marginHorizontal: 10,
+    padding: 25,
+  },
   navContainer: {
     flexDirection: "row",
-    height: 40,
-    width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  paletteContainer: { flex: 1, marginVertical: 20 },
+
+  navPagingContainer: {
+    flexDirection: "row",
+    marginVertical: 5,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  navPage: {
+    marginRight: 8,
+    alignItems: "center",
+    alignContent: "center",
+  },
+  navButton: {
+    position: "absolute",
+    top: "50%",
+    height: 40,
+    width: 40,
+    backgroundColor: "#a49e9e6e",
+
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  navPageSelected: {
+    borderWidth: 2,
+    borderColor: "#6e6868ff",
+    backgroundColor: "transparent",
+    borderRadius: 4,
+  },
+
+  navPageIcon: {
+    height: 20,
+    width: 20,
+    margin: 3,
+    borderRadius: 4,
+  },
+
+  paletteContainer: {
+    flex: 1,
+    marginVertical: 20,
+    backgroundColor: "#fff",
+    borderRadius: 35,
+    padding: 40,
+  },
   palette: {
     alignItems: "center",
     justifyContent: "center",
@@ -300,10 +380,6 @@ const styles = StyleSheet.create({
     width: 60,
     borderRadius: 5,
     margin: 2,
-  },
-  text: {
-    fontWeight: "bold",
-    fontSize: 18,
   },
 
   centeredView: {
@@ -313,6 +389,26 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(60, 51, 51, 0.65)",
   },
 
+  previewContainer: {
+    flex: 1,
+    margin: 20,
+    padding: 15,
+    backgroundColor: "white",
+    borderRadius: 50,
+    padding: 35,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  previewContent: {
+    height: "100%",
+    width: "100%",
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 35,
+    padding: 35,
+    alignItems: "center",
+  },
+
   modalView: {
     margin: 20,
     minHeight: 400,
@@ -320,73 +416,38 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
+
+  modalViewEmpty: {
+    justifyContent: "center",
+  },
+
   modalText: {
     fontSize: 48,
     fontWeight: 900,
     marginBottom: 15,
     textAlign: "center",
   },
-  modalBgText: {
+
+  previewText: {
     fontSize: 48,
-    fontWeight: 700,
+    fontWeight: 900,
     marginBottom: 15,
     textAlign: "center",
     padding: 10,
-    borderRadius: 15,
-  },
-  navButton: {
-    backgroundColor: "#0000aa",
-  },
-  navButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+    borderRadius: 25,
   },
 
-  modalButtonContainer: {
-    width: "100%",
-    // position: "absolute",
-    // bottom: 10,
-    padding: 30,
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    shadowColor: "black",
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
-    shadowOffset: { width: 1, height: 5 },
-  },
-  buttonExplore: {
-    backgroundColor: "steelblue",
+  buttonModal: {
     borderWidth: 2,
     borderColor: "white",
   },
-  buttonCart: {
-    backgroundColor: "steelblue",
-    borderWidth: 2,
-    borderColor: "white",
-  },
+
   buttonClose: {
     position: "absolute",
     top: 5,
     right: 5,
     backgroundColor: "red",
-    borderWidth: 2,
-    borderColor: "white",
   },
 
   cartItem: {
@@ -396,20 +457,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 
-  cartItemName: {
+  cartItemTitleText: {
     margin: 5,
     padding: 5,
-    textAlign: "center",
+    textAlign: "left",
+    fontSize: 24,
   },
 
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+  cartItemBodyText: {
+    fontSize: 18,
+    fontWeight: 300,
   },
-  cartForm: {
-    //  width:'100%'
-  },
+
+  cartForm: {},
   colorNameInput: {
     height: 40,
     width: 150,

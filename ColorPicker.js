@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 
 function ColorPicker({ label, data, currentIndex, onSelected }) {
+  if(!data || !!!data.length) return;
   return (
     <>
       {label && <Text style={styles.title}>{label}</Text>}
