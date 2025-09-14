@@ -48,10 +48,7 @@ export default function CustomRadioButton({ buttons, style, checkedValue, onChec
 }
 
 const styles = StyleSheet.create({
-  container: {
-    //  borderWidth: 2,
-    // borderColor: "lightgray",
-  },
+  container: {},
   title: {
     fontSize: 18,
     fontWeight: 700,

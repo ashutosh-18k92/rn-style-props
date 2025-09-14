@@ -44,9 +44,7 @@ function CartForm({ style }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
+  container: {},
   content: {
     flex: 1,
     flexDirection: "row",

@@ -10,48 +10,57 @@ function Cart({ style }) {
     setCart(colorsCart);
   }, [colorsCart]);
 
-  if (!!!colorsCart.length) return <Text>Your Cart is empty!</Text>;
+  if (!!!colorsCart.length)
+    return (
+      <View style={[styles.container, style]}>
+        <View style={styles.content}>
+          <Text>Your Cart is empty!</Text>
+        </View>
+      </View>
+    );
   return (
-    <View style={[styles.cartContainer, style]}>
-      <ScrollView style={styles.cartScroll}>
-        {cart.map((c, i) => (
-          <View
-            key={i}
-            style={[styles.cartItem, { backgroundColor: c.backgroundColor }, styles.shadow]}
-          >
-            <Text style={[styles.cartItemTitleText, { color: c.color }]}>{c.name}</Text>
-            <Text style={[styles.cartItemBodyText, { color: c.color }]}>
-              Background: {c.backgroundColor}{" "}
-              <Text style={{ marginHorizontal: 15, fontWeight: 700 }}>/</Text> Text: {c.color}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
+    <View style={[styles.container, style]}>
+      <View style={styles.content}>
+        <ScrollView>
+          {cart.map((c, i) => (
+            <View
+              key={i}
+              style={[styles.item, { backgroundColor: c.backgroundColor }, styles.shadow]}
+            >
+              <Text style={[styles.title, { color: c.color }]}>{c.name}</Text>
+              <Text style={[styles.body, { color: c.color }]}>
+                Background: {c.backgroundColor}{" "}
+                <Text style={{ marginHorizontal: 15, fontWeight: 700 }}>/</Text> Text: {c.color}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  cartContainer: {},
-  cartScroll: {
-    flex: 1,
+  container: {},
+  content: {
+    width: "100%",
     paddingVertical: 15,
   },
-  cartItem: {
+  item: {
     height: 90,
     margin: 10,
     padding: 15,
     borderRadius: 5,
   },
 
-  cartItemTitleText: {
+  title: {
     margin: 5,
     padding: 5,
     textAlign: "left",
     fontSize: 24,
   },
 
-  cartItemBodyText: {
+  body: {
     fontSize: 18,
     fontWeight: 300,
   },

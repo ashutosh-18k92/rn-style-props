@@ -7,7 +7,7 @@ import CustomButton from "../Components/CustomButton";
 import { PreviewContext } from "./Contexts";
 import CartForm from "./CartForm";
 
-function Preview() {
+function Preview({ style }) {
   const { selectedColor, selectedTextColor, textColorShades } = useContext(PaletteContext);
   const [activeTextColor, setActiveTextColor] = useState(selectedTextColor);
   const [activePickerIndex, setActivePickerIndex] = useState(null);
@@ -20,7 +20,7 @@ function Preview() {
 
   function renderPreview() {
     return (
-      <View style={[styles.content, { backgroundColor: selectedColor }, GlobalStyles.shadow]}>
+      <View style={[styles.preview, { backgroundColor: selectedColor }, GlobalStyles.shadow]}>
         <Text style={[styles.text, { backgroundColor: activeTextColor, color: selectedColor }]}>
           Background {selectedColor}
         </Text>
@@ -40,7 +40,7 @@ function Preview() {
 
   function renderNoPreview() {
     return (
-      <View style={[styles.content, styles.emptyContent]}>
+      <View style={[styles.preview, styles.emptyContent, GlobalStyles.shadow]}>
         <Text style={styles.text}>No Preview</Text>
       </View>
     );
@@ -48,9 +48,17 @@ function Preview() {
 
   return (
     <PreviewContext value={{ activeTextColor }}>
-      <View style={[styles.container, GlobalStyles.shadow]}>
-        {showPreview ? renderPreview() : renderNoPreview()}
-        <CartForm style={styles.form} />
+      <View style={[styles.container, GlobalStyles.shadow, style]}>
+        <View style={styles.content}>
+          {showPreview ? renderPreview() : renderNoPreview()}
+          <CartForm
+            style={{
+              ...styles.form,
+              ...GlobalStyles.shadow,
+              backgroundColor: activeTextColor ?? "darksalmon",
+            }}
+          />
+        </View>
       </View>
     </PreviewContext>
   );
@@ -58,15 +66,14 @@ function Preview() {
 
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
     padding: 15,
     backgroundColor: "white",
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
   },
-  content: {
-    flex: 1,
+  content: { flex: 1 },
+  preview: {
     backgroundColor: "white",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
@@ -75,6 +82,11 @@ const styles = StyleSheet.create({
   },
   emptyContent: {
     justifyContent: "center",
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "lightgray",
+    width: "100%",
   },
   text: {
     fontSize: 48,
@@ -86,7 +98,8 @@ const styles = StyleSheet.create({
   },
 
   form: {
-    marginTop: 5,
+    // marginTop: 5,
+    // flex: 1,
     paddingVertical: 10,
     backgroundColor: "salmon",
     borderBottomLeftRadius: 35,

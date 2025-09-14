@@ -20,13 +20,11 @@ function ColorPalette({ onSelected }) {
   const [selectedTextColor, setSelectedTextColor] = useState(null);
   //index in a row of the palette for the color picker
   const [selectedColorGridIndex, setSelectedColorGridIndex] = useState({ row: -1, column: -1 });
-  const [selectedTextColorIndex, setSelectedTextColorIndex] = useState(null);
   const [textColorShades, setTextColorShades] = useState([]);
 
   const [selectedColorsHistory, setSelectedColorsHistory] = useState([]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
   const [colorsCart, setColorsCart] = useState([]);
-  const [cartForm, setCartForm] = useState({ name: "", backgroundColor: "", color: "" });
   const [saturation, setSaturation] = useState(Saturation.LOW);
 
   const addToCartHandler = useCallback((cart) => {
@@ -101,11 +99,10 @@ function ColorPalette({ onSelected }) {
       setSelectedColor(color);
       setSelectedTextColor(textColor);
       setTextColorShades(textColorShades);
-      setCartForm((f) => ({ ...f, backgroundColor: color, color: textColor }));
     };
 
     return (
-      <ScrollView>
+      <ScrollView style={{ marginHorizontal: 15, paddingHorizontal: 10 }}>
         {palette.map((colors, i) => (
           <View key={i}>
             <ColorPicker
@@ -116,26 +113,6 @@ function ColorPalette({ onSelected }) {
               }
               onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
             />
-          </View>
-        ))}
-      </ScrollView>
-    );
-  }
-
-  function renderCart() {
-    if (!!!colorsCart.length) return <Text>Your Cart is empty!</Text>;
-    return (
-      <ScrollView style={styles.cartScroll}>
-        {colorsCart.map((c, i) => (
-          <View
-            key={i}
-            style={[styles.cartItem, { backgroundColor: c.backgroundColor }, styles.shadow]}
-          >
-            <Text style={[styles.cartItemTitleText, { color: c.color }]}>{c.name}</Text>
-            <Text style={[styles.cartItemBodyText, { color: c.color }]}>
-              Background: {c.backgroundColor}{" "}
-              <Text style={{ marginHorizontal: 15, fontWeight: 700 }}>/</Text> Text: {c.color}
-            </Text>
           </View>
         ))}
       </ScrollView>
@@ -162,22 +139,21 @@ function ColorPalette({ onSelected }) {
           disabled={nextDisabled}
           onPress={setPaletteProfileNext}
         />
-        <View style={styles.navContainer}>
-          <View style={styles.navPagingContainer}>
-            {selectedColorsHistory.map((color, i) => {
-              const selected = currentHistoryIndex === i;
-              return (
-                <TouchableWithoutFeedback
-                  onPress={() => setPaletteProfileJump(i)}
-                  style={[styles.navPage, selected && styles.navPageSelected]}
-                >
-                  <View
-                    style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}
-                  ></View>
-                </TouchableWithoutFeedback>
-              );
-            })}
-          </View>
+
+        <View style={styles.navPagingContainer}>
+          {selectedColorsHistory.map((color, i) => {
+            const selected = currentHistoryIndex === i;
+            return (
+              <TouchableWithoutFeedback
+                onPress={() => setPaletteProfileJump(i)}
+                style={[styles.navPage, selected && styles.navPageSelected]}
+              >
+                <View
+                  style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}
+                ></View>
+              </TouchableWithoutFeedback>
+            );
+          })}
         </View>
       </>
     );
@@ -190,7 +166,7 @@ function ColorPalette({ onSelected }) {
       { label: "Low", value: Saturation.LOW },
     ];
     return (
-      <View style={styles.paletteContainer}>
+      <>
         {renderNavigationButtons()}
         <CustomRadioButton
           title={"Saturation Level"}
@@ -198,13 +174,13 @@ function ColorPalette({ onSelected }) {
           buttons={buttons}
           onCheck={(val) => setSaturation(val)}
         />
+
+        {renderGrid()}
         <View style={styles.depthContainer}>
           <CustomButton title="Reset" style={styles.capsule} onPress={resetHandler} />
           <CustomButton title="More shades" style={styles.capsule} onPress={viewShadesHandler} />
         </View>
-
-        <View style={styles.gridContainer}>{renderGrid()}</View>
-      </View>
+      </>
     );
   }
 
@@ -213,9 +189,9 @@ function ColorPalette({ onSelected }) {
       <CartContext value={{ colorsCart, addToCartHandler }}>
         <View style={styles.container}>
           <View style={styles.content}>
-            <Preview />
-            {renderPalette()}
-            <Cart style={styles.cart} />
+            <Preview style={styles.component} />
+            <View style={styles.component}>{renderPalette()}</View>
+            <Cart style={styles.component} />
           </View>
         </View>
       </CartContext>
@@ -228,44 +204,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#918f8f30",
   },
-
-  cart: { flex: 1, marginHorizontal: 10, padding: 25 },
-
-  depthContainer: {
-    flexDirection: "row",
-    position: "absolute",
-    alignSelf: "center",
-    bottom: 15,
-    left: 0,
-    right: 0,
-    justifyContent: "space-evenly",
-    padding: 10,
-    overflow: "hidden",
-  },
-
   content: {
     flex: 1,
     flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: 40,
     paddingHorizontal: 20,
-    justifyContent: "center",
   },
+
+  component: {
+    flex: 1,
+    marginVertical: 20,
+    backgroundColor: "white",
+    borderRadius: 35,
+    padding: 40,
+    margin: 20,
+  },
+
   paletteRowContainer: {
     margin: 10,
     borderRadius: 50,
     alignSelf: "center",
   },
-  gridContainer: {
-    flex: 1,
-    marginHorizontal: 15,
-    paddingBottom: 5,
-    marginBottom: 30,
-  },
-
-  navContainer: {
+  depthContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
+    padding: 10,
+    marginTop: 5,
+    overflow: "hidden",
+  },
+  capsule: {
+    borderRadius: 20,
   },
 
   navPagingContainer: {
@@ -281,6 +250,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignContent: "center",
   },
+
   navButton: {
     position: "absolute",
     top: "50%",
@@ -294,7 +264,7 @@ const styles = StyleSheet.create({
 
   navPageSelected: {
     borderWidth: 2,
-    borderColor: "#6e6868ff",
+    borderColor: "lightgray",
     backgroundColor: "transparent",
     borderRadius: 4,
   },
@@ -304,22 +274,6 @@ const styles = StyleSheet.create({
     width: 20,
     margin: 3,
     borderRadius: 4,
-  },
-
-  paletteContainer: {
-    flex: 1,
-    marginVertical: 20,
-    backgroundColor: "#fff",
-    borderRadius: 35,
-    padding: 40,
-  },
-  palette: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 40,
-    width: 60,
-    borderRadius: 5,
-    margin: 2,
   },
 
   shadow: {
