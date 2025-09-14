@@ -1,18 +1,19 @@
 import { FlatList, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-
-
-
-function ColorPicker({ label, data, currentIndex, onSelected }) {
-  if(!data || !!!data.length) return;
+function ColorPicker({ label, data, currentIndex, onSelected, style }) {
+  if (!data || !!!data.length) return;
   return (
     <>
       {label && <Text style={styles.title}>{label}</Text>}
 
       <LinearGradient
         colors={["rgba(203, 205, 208, 0.45)", "rgba(203, 205, 208, 0.60)"]}
-        style={styles.wrapperHorizontal}
+        style={
+          Array.isArray(style)
+            ? [styles.wrapperHorizontal, ...style]
+            : [styles.wrapperHorizontal, style]
+        }
       >
         <FlatList
           bounces
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     height: 30,
     width: 30,
-    backgroundColor: "rgba(210, 210, 210, 0.1)", //"white",
+    backgroundColor: "rgba(210, 210, 210, 0.1)",
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
