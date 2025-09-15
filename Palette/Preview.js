@@ -17,11 +17,9 @@ function Preview({ style }) {
     setActiveTextColor(selectedTextColor);
   }, [selectedTextColor]);
 
-  const showPreview = !!selectedColor && !!activeTextColor;
-
   function renderPreview() {
     return (
-      <View style={[styles.preview, { backgroundColor: selectedColor }, GlobalStyles.shadow]}>
+      <View style={[styles.preview, { backgroundColor: selectedColor }]}>
         <Text
           style={[
             styles.text,
@@ -43,7 +41,7 @@ function Preview({ style }) {
         <ColorPicker
           data={textColorShades}
           minimized={showMiniPicker}
-          onMaximize={()=>setShowMiniPicker(p=>!p)}
+          onMaximize={() => setShowMiniPicker((p) => !p)}
           currentIndex={activePickerIndex}
           onSelected={(index) => {
             setActivePickerIndex(index);
