@@ -6,9 +6,19 @@ import CustomButton from "./CustomButton";
 function ColorPicker({ label, data, currentIndex, onSelected, style, minimized, onMaximize }) {
   if (!data || !!!data.length) return;
 
+  const [selectedIndex, setSelectedIndex] = useState(currentIndex);
+  /** Since same number is hard to track */
+  const [updateHelper, setUpdateHelper] = useState();
+
   const onSelectHandler = (index) => {
-    onSelected(index);
+    setSelectedIndex(index);
+    setUpdateHelper(Math.random());
   };
+
+  useEffect(() => {
+    if (selectedIndex === currentIndex) onSelected(undefined);
+    else onSelected(selectedIndex);
+  }, [selectedIndex, updateHelper]);
 
   function renderItem({ item, index }) {
     const selected = index === currentIndex;
@@ -56,9 +66,8 @@ function ColorPicker({ label, data, currentIndex, onSelected, style, minimized, 
             renderItem={renderItem}
           />
         )}
-        {!minimized && onMaximize && <CustomButton title="Hide" noShadow onPress={onMaximize}/>}
+        {!minimized && onMaximize && <CustomButton title="Hide" noShadow onPress={onMaximize} />}
       </LinearGradient>
-      
     </>
   );
 }
@@ -69,7 +78,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 13,
     borderRadius: 30,
-
   },
   color: {
     height: 30,
@@ -83,7 +91,7 @@ const styles = StyleSheet.create({
   },
 
   item: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     height: 30,
     width: 30,
     backgroundColor: "rgba(210, 210, 210, 0.1)",

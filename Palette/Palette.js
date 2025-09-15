@@ -1,5 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import ColorPicker from "../Components/ColorPicker";
 import CustomButton from "../Components/CustomButton";
 import CustomRadioButton from "../Components/CustomRadioButton";
@@ -13,6 +20,8 @@ import {
 import { PaletteContext } from "./Contexts";
 
 function Palette({ onSelected, style }) {
+  const { height, width } = useWindowDimensions();
+
   const [palette, setPalette] = useState(null);
   const { setSelectedColor, setSelectedTextColor, setTextColorShades, selectedColor } =
     useContext(PaletteContext);
@@ -69,19 +78,11 @@ function Palette({ onSelected, style }) {
   }, []);
 
   useEffect(() => {
-    const colors = getShadesOfBgColor(selectedColor, saturation);
+    // const colors = getShadesOfBgColor(selectedColor, saturation);
+    const colors = getShadesOfBgColor(undefined, saturation);
     setPalette(colors);
+    resetHandler();
   }, [saturation]);
-
-  const colorSelectHandler = (row, column) => {
-    const color = palette[row][column];
-    const textColor = getOptimalTextColor(color);
-    const textColorShades = getShadesOfTextColor(textColor);
-    setSelectedColorGridIndex({ row, column });
-    setSelectedColor(color);
-    setSelectedTextColor(textColor);
-    setTextColorShades(textColorShades);
-  };
 
   function renderNavigationButtons() {
     const nextDisabled = currentHistoryIndex === selectedColorsHistory.length - 1;
@@ -138,18 +139,82 @@ function Palette({ onSelected, style }) {
   }
 
   function renderColorPicker() {
-    return palette.map((colors, i) => (
-      <View key={i}>
-        <ColorPicker
-          style={[styles.paletteRowContainer, styles.shadow]}
-          data={colors}
-          currentIndex={
-            i === selectedColorGridIndex.row ? selectedColorGridIndex.column : undefined
-          }
-          onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
-        />
-      </View>
-    ));
+    const iconSize = 55;
+    const chunkSize = Math.floor(width / iconSize);
+
+    const colorSelectHandler = (row, column) => {
+      //row major indexing
+      const color = palette[row * chunkSize + column];
+      const textColor = getOptimalTextColor(color);
+      const textColorShades = getShadesOfTextColor(textColor);
+      setSelectedColorGridIndex({ row, column });
+      setSelectedColor(color);
+      setSelectedTextColor(textColor);
+      setTextColorShades(textColorShades);
+    };
+
+
+    /**
+     * experimenting with color patterns, it appears that these colors though are following a pattern of iteration but their diplay is human sorted. So leaving this project here and it would be better to use the sorted palette provided by the web colors.  The 216 Web Safe Colors. 
+     * @param {*} grid 
+     * @returns 
+     */
+    const transpose = (grid) => {
+      let gridTranspose = [];
+
+      const columns = grid[0].length;
+      for (let i = 0; i < columns; i++) {
+        gridTranspose.push([]);
+      }
+
+      const rows = grid.length;
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+          gridTranspose[j][i] = grid[i][j];
+        }
+      }
+
+      return gridTranspose;
+    };
+
+    const linerarize = (grid) => {
+      let arr = [];
+      grid.forEach((element) => {
+        arr = arr.concat(element);
+      });
+      return arr;
+    };
+
+    const gridify = (arr) => {
+      let grid = [];
+      let counter = 0;
+      for (let step = 0; step <= arr.length; step += chunkSize) {
+        let start = counter * chunkSize;
+        let end = Math.min((counter + 1) * chunkSize, arr.length - 1);
+        if (end < start) break;
+        let chunk = arr.slice(start, end);
+        grid.push(chunk);
+        counter++;
+      }
+      return grid;
+    };
+
+    return gridify(linerarize(transpose(gridify(palette)))).map((colors, rowIndex) => {
+      const { row, column } = selectedColorGridIndex;
+      const currentIndex = rowIndex === row ? column : undefined;
+      return (
+        <View key={rowIndex}>
+          <ColorPicker
+            style={[styles.paletteRowContainer, styles.shadow]}
+            data={colors}
+            currentIndex={currentIndex}
+            onSelected={(pickerIndex) => {
+              colorSelectHandler(rowIndex, pickerIndex);
+            }}
+          />
+        </View>
+      );
+    });
   }
 
   if (!palette || palette.length === 0) {

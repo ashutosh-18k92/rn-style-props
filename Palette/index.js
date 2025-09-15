@@ -62,7 +62,7 @@ function ColorPalette({ onSelected }) {
               activeTab={"palette"}
               onSelect={setActiveTab}
             />
-            <ScrollView>{renderTab()}</ScrollView>
+            {renderTab()}
           </View>
         </View>
       </CartContext>
@@ -92,10 +92,8 @@ const styles = StyleSheet.create({
     borderColor: "lightgray",
   },
   preview: {},
-  palette: {
-    height: 400,
-  },
-  cart: {},
+  palette: { flex: 1 },
+  cart: { flex: 1 },
 
   paletteRowContainer: {
     margin: 10,
