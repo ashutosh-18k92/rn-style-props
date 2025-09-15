@@ -10,7 +10,19 @@ function Cart({ style }) {
     setCart(colorsCart);
   }, [colorsCart]);
 
-  if (!!!colorsCart.length)
+  function renderCartItem(cart, i) {
+    const { name, color, backgroundColor } = cart;
+    return (
+      <View key={i} style={[styles.item, { backgroundColor }, styles.shadow]}>
+        <Text style={[styles.title, { color }]}>{name}</Text>
+        <Text style={[styles.body, { color }]}>
+          Background: {backgroundColor} Text: {color}
+        </Text>
+      </View>
+    );
+  }
+
+  if (colorsCart.length == 0)
     return (
       <View style={[styles.container, style]}>
         <View style={styles.content}>
@@ -21,20 +33,7 @@ function Cart({ style }) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.content}>
-        <ScrollView>
-          {cart.map((c, i) => (
-            <View
-              key={i}
-              style={[styles.item, { backgroundColor: c.backgroundColor }, styles.shadow]}
-            >
-              <Text style={[styles.title, { color: c.color }]}>{c.name}</Text>
-              <Text style={[styles.body, { color: c.color }]}>
-                Background: {c.backgroundColor}{" "}
-                <Text style={{ marginHorizontal: 15, fontWeight: 700 }}>/</Text> Text: {c.color}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
+        <ScrollView>{cart.map(renderCartItem)}</ScrollView>
       </View>
     </View>
   );
@@ -43,8 +42,8 @@ function Cart({ style }) {
 const styles = StyleSheet.create({
   container: {},
   content: {
-    width: "100%",
-    paddingVertical: 15,
+    flex: 1,
+    margin: 5,
   },
   item: {
     height: 90,
@@ -54,8 +53,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    margin: 5,
-    padding: 5,
+    marginBottom: 5,
     textAlign: "left",
     fontSize: 24,
   },

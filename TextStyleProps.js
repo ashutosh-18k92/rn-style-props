@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import ColorPicker from "./ColorPicker";
-import CustomPicker from "./CustomPicker";
-import CustomSlider from "./CustomSlider";
-import CustomSwitch from "./CustomSwitch";
+import ColorPicker from "./Components/ColorPicker";
+import CustomPicker from "./Components/CustomPicker";
+import CustomSlider from "./Components/CustomSlider";
+import CustomSwitch from "./Components/CustomSwitch";
 
 const fontStyles = ["normal", "italic"];
 const fontVariants = [

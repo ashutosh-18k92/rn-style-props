@@ -39,3 +39,17 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+assets/fonts/MaterialSymbolsRounded_Filled-Bold.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-ExtraLight.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-Light.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-Medium.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-Regular.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-SemiBold.ttf
+assets/fonts/MaterialSymbolsRounded_Filled-Thin.ttf
+assets/fonts/MaterialSymbolsRounded-Bold.ttf
+assets/fonts/MaterialSymbolsRounded-ExtraLight.ttf
+assets/fonts/MaterialSymbolsRounded-Light.ttf
+assets/fonts/MaterialSymbolsRounded-Medium.ttf
+assets/fonts/MaterialSymbolsRounded-Regular.ttf
+assets/fonts/MaterialSymbolsRounded-SemiBold.ttf
+assets/fonts/MaterialSymbolsRounded-Thin.ttf

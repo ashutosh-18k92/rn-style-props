@@ -50,7 +50,7 @@ export default function CustomRadioButton({ buttons, style, checkedValue, onChec
 const styles = StyleSheet.create({
   container: {},
   title: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 700,
     fontFamily: "Roboto",
     position: "absolute",
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 400,
     marginRight: 5,
     color: "dimgray",

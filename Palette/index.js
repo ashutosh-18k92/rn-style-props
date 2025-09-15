@@ -13,19 +13,20 @@ import {
 import { CartContext, PaletteContext } from "./Contexts";
 import Preview from "./Preview";
 import Cart from "./Cart";
+import Palette from "./Palette";
 
 function ColorPalette({ onSelected }) {
-  const [palette, setPalette] = useState(null);
+  // const [palette, setPalette] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedTextColor, setSelectedTextColor] = useState(null);
   //index in a row of the palette for the color picker
-  const [selectedColorGridIndex, setSelectedColorGridIndex] = useState({ row: -1, column: -1 });
+  // const [selectedColorGridIndex, setSelectedColorGridIndex] = useState({ row: -1, column: -1 });
   const [textColorShades, setTextColorShades] = useState([]);
 
-  const [selectedColorsHistory, setSelectedColorsHistory] = useState([]);
-  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
+  // const [selectedColorsHistory, setSelectedColorsHistory] = useState([]);
+  // const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
   const [colorsCart, setColorsCart] = useState([]);
-  const [saturation, setSaturation] = useState(Saturation.LOW);
+  // const [saturation, setSaturation] = useState(Saturation.LOW);
 
   const addToCartHandler = useCallback((cart) => {
     setColorsCart((prev) => {
@@ -35,7 +36,7 @@ function ColorPalette({ onSelected }) {
     });
   });
 
-  const viewShadesHandler = () => {
+  /*const viewShadesHandler = () => {
     const colors = getShadesOfBgColor(selectedColor, saturation);
     setPalette(colors);
     setSelectedColorsHistory((p) => {
@@ -43,9 +44,9 @@ function ColorPalette({ onSelected }) {
       return [...p];
     });
     setCurrentHistoryIndex((p) => p + 1);
-  };
+  };*/
 
-  const resetHandler = () => {
+  /*const resetHandler = () => {
     setSelectedColor(null);
     setSelectedTextColor(null);
     setSelectedColorGridIndex({});
@@ -73,20 +74,20 @@ function ColorPalette({ onSelected }) {
     const palette = getShadesOfBgColor(color);
     setPalette(palette);
     setCurrentHistoryIndex((p) => p - 1);
-  };
+  };*/
 
   //init
-  useEffect(() => {
+  /*useEffect(() => {
     const colors = getShadesOfBgColor();
     setPalette(colors);
-  }, []);
+  }, []);*/
 
-  useEffect(() => {
+  /*useEffect(() => {
     const colors = getShadesOfBgColor(selectedColor, saturation);
     setPalette(colors);
-  }, [saturation]);
+  }, [saturation]);*/
 
-  function renderGrid() {
+  /*function renderGrid() {
     const paletteIsEmpty = !palette || palette.length === 0;
     if (paletteIsEmpty) {
       return <Text>Palette is empty</Text>;
@@ -100,31 +101,51 @@ function ColorPalette({ onSelected }) {
       setSelectedTextColor(textColor);
       setTextColorShades(textColorShades);
     };
+     const saturationButtons = [
+    { label: "High", value: Saturation.HIGH },
+    { label: "Med", value: Saturation.MEDIUM },
+    { label: "Low", value: Saturation.LOW },
+  ];
+
 
     return (
-      <ScrollView style={{ marginHorizontal: 15, paddingHorizontal: 10 }}>
-        {palette.map((colors, i) => (
-          <View key={i}>
-            <ColorPicker
-              style={[styles.paletteRowContainer, styles.shadow]}
-              data={colors}
-              currentIndex={
-                i === selectedColorGridIndex.row ? selectedColorGridIndex.column : undefined
-              }
-              onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
-            />
-          </View>
-        ))}
-      </ScrollView>
-    );
-  }
+      <>
+        {renderNavigationButtons()}
+        <CustomRadioButton
+          title={"Saturation Level"}
+          checkedValue={Saturation.LOW}
+          buttons={saturationButtons}
+          onCheck={(val) => setSaturation(val)}
+        />
 
-  function renderNavigationButtons() {
+        <ScrollView style={{ marginHorizontal: 15, paddingHorizontal: 10 }}>
+          {palette.map((colors, i) => (
+            <View key={i}>
+              <ColorPicker
+                style={[styles.paletteRowContainer, styles.shadow]}
+                data={colors}
+                currentIndex={
+                  i === selectedColorGridIndex.row ? selectedColorGridIndex.column : undefined
+                }
+                onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
+              />
+            </View>
+          ))}
+        </ScrollView>
+        <View style={styles.depthContainer}>
+          <CustomButton title="Reset" style={styles.capsule} onPress={resetHandler} />
+          <CustomButton title="More shades" style={styles.capsule} onPress={viewShadesHandler} />
+        </View>
+      </>
+    );
+  }*/
+
+  /*function renderNavigationButtons() {
     const nextDisabled = currentHistoryIndex === selectedColorsHistory.length - 1;
     const prevDisabled = currentHistoryIndex === -1;
 
     return (
-      <>
+      <View style={styles.navPagingContainer}>
         <IconButton
           name="arrow-back"
           color="darkgray"
@@ -132,6 +153,17 @@ function ColorPalette({ onSelected }) {
           disabled={prevDisabled}
           onPress={setPaletteProfilePrevious}
         />
+        {selectedColorsHistory.map((color, i) => {
+          const selected = currentHistoryIndex === i;
+          return (
+            <TouchableWithoutFeedback
+              onPress={() => setPaletteProfileJump(i)}
+              style={[styles.navPage, selected && styles.navPageSelected]}
+            >
+              <View style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}></View>
+            </TouchableWithoutFeedback>
+          );
+        })}
         <IconButton
           name="arrow-forward"
           color="darkgray"
@@ -139,59 +171,29 @@ function ColorPalette({ onSelected }) {
           disabled={nextDisabled}
           onPress={setPaletteProfileNext}
         />
-
-        <View style={styles.navPagingContainer}>
-          {selectedColorsHistory.map((color, i) => {
-            const selected = currentHistoryIndex === i;
-            return (
-              <TouchableWithoutFeedback
-                onPress={() => setPaletteProfileJump(i)}
-                style={[styles.navPage, selected && styles.navPageSelected]}
-              >
-                <View
-                  style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}
-                ></View>
-              </TouchableWithoutFeedback>
-            );
-          })}
-        </View>
-      </>
+      </View>
     );
-  }
-
-  function renderPalette() {
-    const buttons = [
-      { label: "High", value: Saturation.HIGH },
-      { label: "Med", value: Saturation.MEDIUM },
-      { label: "Low", value: Saturation.LOW },
-    ];
-    return (
-      <>
-        {renderNavigationButtons()}
-        <CustomRadioButton
-          title={"Saturation Level"}
-          checkedValue={Saturation.LOW}
-          buttons={buttons}
-          onCheck={(val) => setSaturation(val)}
-        />
-
-        {renderGrid()}
-        <View style={styles.depthContainer}>
-          <CustomButton title="Reset" style={styles.capsule} onPress={resetHandler} />
-          <CustomButton title="More shades" style={styles.capsule} onPress={viewShadesHandler} />
-        </View>
-      </>
-    );
-  }
+  }*/
 
   return (
-    <PaletteContext value={{ selectedColor, selectedTextColor, textColorShades }}>
+    <PaletteContext
+      value={{
+        selectedColor,
+        selectedTextColor,
+        textColorShades,
+        setSelectedColor,
+        setSelectedTextColor,
+        setTextColorShades,
+      }}
+    >
       <CartContext value={{ colorsCart, addToCartHandler }}>
         <View style={styles.container}>
           <View style={styles.content}>
-            <Preview style={styles.component} />
-            <View style={styles.component}>{renderPalette()}</View>
-            <Cart style={styles.component} />
+            <ScrollView>
+              <Preview style={{ ...styles.preview, ...styles.borderContainer }} />
+              <Palette style={{ ...styles.palette, ...styles.borderContainer }} />
+              <Cart style={{ ...styles.cart, ...styles.borderContainer }} />
+            </ScrollView>
           </View>
         </View>
       </CartContext>
@@ -202,24 +204,30 @@ function ColorPalette({ onSelected }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#918f8f30",
+    backgroundColor: "white",
   },
   content: {
     flex: 1,
-    flexDirection: "row",
     justifyContent: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 35,
+    marginTop: 20,
+    // rowGap: 12,
   },
 
-  component: {
-    flex: 1,
-    marginVertical: 20,
-    backgroundColor: "white",
-    borderRadius: 35,
-    padding: 40,
-    margin: 20,
+  borderContainer: {
+    margin: 5,
+    borderWidth: 1,
+    padding: 15,
+    borderRadius: 25,
+    borderColor: "lightgray",
   },
+  preview: {},
+  palette: {
+    height:400
+  },
+  cart: {},
 
   paletteRowContainer: {
     margin: 10,
@@ -253,7 +261,7 @@ const styles = StyleSheet.create({
 
   navButton: {
     position: "absolute",
-    top: "50%",
+    top: 0,
     height: 40,
     width: 40,
     backgroundColor: "lightgray",

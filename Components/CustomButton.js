@@ -38,17 +38,14 @@ function CustomButton({ title, disabled, onPress, style, textStyle, noShadow }) 
 const styles = StyleSheet.create({
   button: {
     borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    padding: 7,
     backgroundColor: "transparent",
   },
   textStyle: {
     color: "white",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 700,
     textAlign: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 5,
   },
 
   shadow: {

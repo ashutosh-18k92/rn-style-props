@@ -10,7 +10,8 @@ import CartForm from "./CartForm";
 function Preview({ style }) {
   const { selectedColor, selectedTextColor, textColorShades } = useContext(PaletteContext);
   const [activeTextColor, setActiveTextColor] = useState(selectedTextColor);
-  const [activePickerIndex, setActivePickerIndex] = useState(null);
+  const [activePickerIndex, setActivePickerIndex] = useState(0);
+  const [showMiniPicker, setShowMiniPicker] = useState(true);
 
   useEffect(() => {
     setActiveTextColor(selectedTextColor);
@@ -21,13 +22,28 @@ function Preview({ style }) {
   function renderPreview() {
     return (
       <View style={[styles.preview, { backgroundColor: selectedColor }, GlobalStyles.shadow]}>
-        <Text style={[styles.text, { backgroundColor: activeTextColor, color: selectedColor }]}>
-          Background {selectedColor}
+        <Text
+          style={[
+            styles.text,
+            { backgroundColor: activeTextColor, color: selectedColor ?? "lightgray" },
+          ]}
+        >
+          Background {selectedColor || "#None"}
         </Text>
 
-        <Text style={[styles.text, { color: activeTextColor }]}>Text {activeTextColor}</Text>
+        <Text
+          style={[
+            styles.text,
+            { color: activeTextColor ?? "lightgray", backgroundColor: "transparent" },
+          ]}
+        >
+          Text {activeTextColor || "#None"}
+        </Text>
+
         <ColorPicker
           data={textColorShades}
+          minimized={showMiniPicker}
+          onMaximize={()=>setShowMiniPicker(p=>!p)}
           currentIndex={activePickerIndex}
           onSelected={(index) => {
             setActivePickerIndex(index);
@@ -38,19 +54,12 @@ function Preview({ style }) {
     );
   }
 
-  function renderNoPreview() {
-    return (
-      <View style={[styles.preview, styles.emptyContent, GlobalStyles.shadow]}>
-        <Text style={styles.text}>No Preview</Text>
-      </View>
-    );
-  }
-
   return (
     <PreviewContext value={{ activeTextColor }}>
-      <View style={[styles.container, GlobalStyles.shadow, style]}>
+      <View style={[styles.container, style]}>
         <View style={styles.content}>
-          {showPreview ? renderPreview() : renderNoPreview()}
+          {renderPreview()}
+
           <CartForm
             style={{
               ...styles.form,
@@ -65,19 +74,13 @@ function Preview({ style }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-    backgroundColor: "white",
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: { flex: 1 },
+  container: {},
+  content: {},
   preview: {
     backgroundColor: "white",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    padding: 35,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 5,
     alignItems: "center",
   },
   emptyContent: {
@@ -86,21 +89,18 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: "lightgray",
-    width: "100%",
   },
   text: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: 900,
-    marginBottom: 15,
+    margin: 15,
     textAlign: "center",
     padding: 10,
     borderRadius: 25,
   },
 
   form: {
-    // marginTop: 5,
-    // flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 17,
     backgroundColor: "salmon",
     borderBottomLeftRadius: 35,
     borderBottomRightRadius: 35,

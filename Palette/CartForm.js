@@ -50,12 +50,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 7,
-    marginHorizontal: 25,
+    paddingHorizontal: 13,
   },
 
   textInput: {
-    flex: 2,
+    flex: 5,
     lineHeight: 28,
     borderWidth: 2,
     borderColor: "lightgray",
@@ -68,10 +67,11 @@ const styles = StyleSheet.create({
     padding: 5,
     paddingLeft: 20,
     color: "dimgray",
+    width: "100%",
   },
 
   button: {
-    flex: 1,
+    flex: 2,
     alignSelf: "stretch",
     justifyContent: "center",
     borderTopLeftRadius: 0,
