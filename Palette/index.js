@@ -1,32 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-import ColorPicker from "../Components/ColorPicker";
-import CustomButton from "../Components/CustomButton";
-import CustomRadioButton from "../Components/CustomRadioButton";
-import IconButton from "../Components/IconButton";
-import {
-  getOptimalTextColor,
-  getShadesOfBgColor,
-  getShadesOfTextColor,
-  Saturation,
-} from "../hex-utils";
-import { CartContext, PaletteContext } from "./Contexts";
-import Preview from "./Preview";
+import { useCallback, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import CustomTabs from "../Components/CustomTabs";
 import Cart from "./Cart";
+import { CartContext, PaletteContext } from "./Contexts";
 import Palette from "./Palette";
+import Preview from "./Preview";
 
 function ColorPalette({ onSelected }) {
-  // const [palette, setPalette] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedTextColor, setSelectedTextColor] = useState(null);
-  //index in a row of the palette for the color picker
-  // const [selectedColorGridIndex, setSelectedColorGridIndex] = useState({ row: -1, column: -1 });
   const [textColorShades, setTextColorShades] = useState([]);
-
-  // const [selectedColorsHistory, setSelectedColorsHistory] = useState([]);
-  // const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
   const [colorsCart, setColorsCart] = useState([]);
-  // const [saturation, setSaturation] = useState(Saturation.LOW);
+
+  const tabs = [
+    { label: "Palette", value: "palette" },
+    { label: "Cart", value: "cart" },
+  ];
+  const [activeTab, setActiveTab] = useState("palette");
 
   const addToCartHandler = useCallback((cart) => {
     setColorsCart((prev) => {
@@ -36,144 +26,19 @@ function ColorPalette({ onSelected }) {
     });
   });
 
-  /*const viewShadesHandler = () => {
-    const colors = getShadesOfBgColor(selectedColor, saturation);
-    setPalette(colors);
-    setSelectedColorsHistory((p) => {
-      p.push(selectedColor);
-      return [...p];
-    });
-    setCurrentHistoryIndex((p) => p + 1);
-  };*/
-
-  /*const resetHandler = () => {
-    setSelectedColor(null);
-    setSelectedTextColor(null);
-    setSelectedColorGridIndex({});
-    setTextColorShades([]);
-    setSelectedColorsHistory([]);
-    setCurrentHistoryIndex(-1);
-  };
-
-  const setPaletteProfileJump = (index) => {
-    let color = selectedColorsHistory[index];
-    const palette = getShadesOfBgColor(color);
-    setPalette(palette);
-    setCurrentHistoryIndex(index);
-  };
-
-  const setPaletteProfileNext = () => {
-    let color = selectedColorsHistory[currentHistoryIndex + 1];
-    const palette = getShadesOfBgColor(color);
-    setPalette(palette);
-    setCurrentHistoryIndex((p) => p + 1);
-  };
-
-  const setPaletteProfilePrevious = () => {
-    let color = selectedColorsHistory[currentHistoryIndex - 1];
-    const palette = getShadesOfBgColor(color);
-    setPalette(palette);
-    setCurrentHistoryIndex((p) => p - 1);
-  };*/
-
-  //init
-  /*useEffect(() => {
-    const colors = getShadesOfBgColor();
-    setPalette(colors);
-  }, []);*/
-
-  /*useEffect(() => {
-    const colors = getShadesOfBgColor(selectedColor, saturation);
-    setPalette(colors);
-  }, [saturation]);*/
-
-  /*function renderGrid() {
-    const paletteIsEmpty = !palette || palette.length === 0;
-    if (paletteIsEmpty) {
-      return <Text>Palette is empty</Text>;
+  const renderTab = () => {
+    switch (activeTab) {
+      case "palette":
+        return (
+          <>
+            <Preview style={{ ...styles.preview, ...styles.borderContainer }} />
+            <Palette style={{ ...styles.palette, ...styles.borderContainer }} />
+          </>
+        );
+      case "cart":
+        return <Cart style={{ ...styles.cart, ...styles.borderContainer }} />;
     }
-    const colorSelectHandler = (row, column) => {
-      const color = palette[row][column];
-      const textColor = getOptimalTextColor(color);
-      const textColorShades = getShadesOfTextColor(textColor);
-      setSelectedColorGridIndex({ row, column });
-      setSelectedColor(color);
-      setSelectedTextColor(textColor);
-      setTextColorShades(textColorShades);
-    };
-     const saturationButtons = [
-    { label: "High", value: Saturation.HIGH },
-    { label: "Med", value: Saturation.MEDIUM },
-    { label: "Low", value: Saturation.LOW },
-  ];
-
-
-    return (
-      <>
-        {renderNavigationButtons()}
-        <CustomRadioButton
-          title={"Saturation Level"}
-          checkedValue={Saturation.LOW}
-          buttons={saturationButtons}
-          onCheck={(val) => setSaturation(val)}
-        />
-
-        <ScrollView style={{ marginHorizontal: 15, paddingHorizontal: 10 }}>
-          {palette.map((colors, i) => (
-            <View key={i}>
-              <ColorPicker
-                style={[styles.paletteRowContainer, styles.shadow]}
-                data={colors}
-                currentIndex={
-                  i === selectedColorGridIndex.row ? selectedColorGridIndex.column : undefined
-                }
-                onSelected={(pickerIndex) => colorSelectHandler(i, pickerIndex)}
-              />
-            </View>
-          ))}
-        </ScrollView>
-        <View style={styles.depthContainer}>
-          <CustomButton title="Reset" style={styles.capsule} onPress={resetHandler} />
-          <CustomButton title="More shades" style={styles.capsule} onPress={viewShadesHandler} />
-        </View>
-      </>
-    );
-  }*/
-
-  /*function renderNavigationButtons() {
-    const nextDisabled = currentHistoryIndex === selectedColorsHistory.length - 1;
-    const prevDisabled = currentHistoryIndex === -1;
-
-    return (
-      <View style={styles.navPagingContainer}>
-        <IconButton
-          name="arrow-back"
-          color="darkgray"
-          style={[styles.navButton, { left: 10 }]}
-          disabled={prevDisabled}
-          onPress={setPaletteProfilePrevious}
-        />
-        {selectedColorsHistory.map((color, i) => {
-          const selected = currentHistoryIndex === i;
-          return (
-            <TouchableWithoutFeedback
-              onPress={() => setPaletteProfileJump(i)}
-              style={[styles.navPage, selected && styles.navPageSelected]}
-            >
-              <View style={[styles.navPageIcon, styles.shadow, { backgroundColor: color }]}></View>
-            </TouchableWithoutFeedback>
-          );
-        })}
-        <IconButton
-          name="arrow-forward"
-          color="darkgray"
-          style={[styles.navButton, { right: 10 }]}
-          disabled={nextDisabled}
-          onPress={setPaletteProfileNext}
-        />
-      </View>
-    );
-  }*/
+  };
 
   return (
     <PaletteContext
@@ -189,11 +54,15 @@ function ColorPalette({ onSelected }) {
       <CartContext value={{ colorsCart, addToCartHandler }}>
         <View style={styles.container}>
           <View style={styles.content}>
-            <ScrollView>
-              <Preview style={{ ...styles.preview, ...styles.borderContainer }} />
-              <Palette style={{ ...styles.palette, ...styles.borderContainer }} />
-              <Cart style={{ ...styles.cart, ...styles.borderContainer }} />
-            </ScrollView>
+            <CustomTabs
+              tabs={[
+                { label: "Palette", value: "palette" },
+                { label: "Cart", value: "cart" },
+              ]}
+              activeTab={"palette"}
+              onSelect={setActiveTab}
+            />
+            <ScrollView>{renderTab()}</ScrollView>
           </View>
         </View>
       </CartContext>
@@ -213,7 +82,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     borderRadius: 35,
     marginTop: 20,
-    // rowGap: 12,
   },
 
   borderContainer: {
@@ -225,7 +93,7 @@ const styles = StyleSheet.create({
   },
   preview: {},
   palette: {
-    height:400
+    height: 400,
   },
   cart: {},
 
